@@ -2,13 +2,14 @@ import { Plugin } from '@typings/plugin';
 import { fetchApi } from '@libs/fetch';
 import { load as parseHTML } from 'cheerio';
 import { defaultCover } from '@libs/defaultCover';
+import { c } from 'node_modules/vite/dist/node/types.d-aGj9QkWt';
 
 class StorySeedlingPlugin implements Plugin.PluginBase {
   id = 'storyseedling';
   name = 'StorySeedling';
   icon = 'src/en/storyseedling/icon.png';
   site = 'https://storyseedling.com/';
-  version = '1.0.2';
+  version = '1.0.3';
 
   async popularNovels(pageNo: number): Promise<Plugin.NovelItem[]> {
     const novels: Plugin.NovelItem[] = [];
@@ -79,30 +80,43 @@ class StorySeedlingPlugin implements Plugin.PluginBase {
 
     const chapters: Plugin.ChapterItem[] = [];
 
-    loadedCheerio(
-      'div.grid.w-full.grid-cols-1.gap-4.md\\:grid-cols-2 > a',
-    ).each(function () {
-      if (loadedCheerio(this).find('> div').length == 2) {
+    const postValue = loadedCheerio('div[ax-load][x-data]')
+      .attr('x-data')
+      ?.replace("toc('65335', '", '')
+      .replace("')", '') as string;
+
+    const data = new FormData();
+    data.append('post', postValue);
+    console.log(postValue);
+    console.log(novelPath.replace('series', '').replace('/', ''));
+    data.append('id', novelPath.replace('series', '').replace('/', ''));
+    data.append('action', 'series_toc');
+    const response: any = await fetchApi(this.site + 'ajax', {
+      body: data,
+      method: 'POST',
+    }).then(res => res.json());
+
+    response.data.forEach((element: any) => {
+      if (element.is_locked) {
         return;
       }
-      const name = loadedCheerio(this).find('.truncate').text().trim();
-      const url = loadedCheerio(this).attr('href') as string;
-      const releaseTime = loadedCheerio(this)
-        .find('div > div > small')
-        .text()
-        .trim();
-      const chapterNumber = name.split('-')[0].trim().split(' ')[1];
-
+      const releaseTime = element.date;
+      const chapterNumber = element.title.split('-')[0].trim().split(' ')[1];
       chapters.push({
-        name: name,
-        path: url.replace(site, ''),
+        name: element.title,
+        path: element.url.replace(site, ''),
         releaseTime,
         chapterNumber: parseInt(chapterNumber),
       });
     });
     novel.chapters = chapters;
+    novel.chapters.sort(
+      (a, b) => (b.chapterNumber ?? 0) - (a.chapterNumber ?? 0),
+    );
+
     return novel;
   }
+
   async parseChapter(chapterPath: string): Promise<string> {
     const body = await fetchApi(this.site + chapterPath).then(r => r.text());
 
