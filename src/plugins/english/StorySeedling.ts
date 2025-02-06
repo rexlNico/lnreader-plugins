@@ -9,7 +9,7 @@ class StorySeedlingPlugin implements Plugin.PluginBase {
   name = 'StorySeedling';
   icon = 'src/en/storyseedling/icon.png';
   site = 'https://storyseedling.com/';
-  version = '1.0.4';
+  version = '1.0.5';
 
   async popularNovels(pageNo: number): Promise<Plugin.NovelItem[]> {
     const novels: Plugin.NovelItem[] = [];
@@ -111,7 +111,7 @@ class StorySeedlingPlugin implements Plugin.PluginBase {
     });
     novel.chapters = chapters;
     novel.chapters.sort(
-      (a, b) => (a.chapterNumber ?? 0) - (b.chapterNumber ?? 0),
+      (a, b) => (b.chapterNumber ?? 0) - (a.chapterNumber ?? 0),
     );
 
     return novel;
