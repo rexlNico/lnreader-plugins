@@ -111,7 +111,7 @@ class StorySeedlingPlugin implements Plugin.PluginBase {
     });
     novel.chapters = chapters;
     novel.chapters.sort(
-      (a, b) => (b.chapterNumber ?? 0) - (a.chapterNumber ?? 0),
+      (a, b) => (a.chapterNumber ?? 0) - (b.chapterNumber ?? 0),
     );
 
     return novel;
@@ -121,10 +121,18 @@ class StorySeedlingPlugin implements Plugin.PluginBase {
     const body = await fetchApi(this.site + chapterPath).then(r => r.text());
 
     const loadedCheerio = parseHTML(body);
-    const t = loadedCheerio('div.justify-center > div.mb-4');
+    const t = loadedCheerio('body');
     const chapterText = t.html() || '';
 
-    return chapterText;
+    //console.log(await fetchApi("http://127.0.0.1:8000/page.html").then(r => r.text()));
+    const id = chapterPath.split('/')[2];
+    const body2 = await fetchApi(
+      'http://93.219.34.136:3000/chapter/' + id,
+    ).then(r => r.text());
+    //console.log(body2);
+    //const cheerio = parseHTML(body2)("body");
+    //console.log(cheerio.html());
+    return body2 || '';
   }
 
   async searchNovels(

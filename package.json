@@ -23,6 +23,7 @@
   "author": "LNReader",
   "license": "MIT",
   "dependencies": {
+    "lnreader-plugins": "file:",
     "terser": "^5.36.0",
     "typescript": "^5.7.2"
   },
