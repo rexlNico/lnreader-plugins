@@ -125,9 +125,11 @@ class StorySeedlingPlugin implements Plugin.PluginBase {
     const chapterText = t.html() || '';
 
     //console.log(await fetchApi("http://127.0.0.1:8000/page.html").then(r => r.text()));
-    const id = chapterPath.split('/')[2];
+    const split = chapterPath.split('/');
+    const novel = split[1];
+    const id = split[2];
     const body2 = await fetchApi(
-      'http://93.219.34.136:3000/chapter/' + id,
+      'http://93.219.34.136:3000/' + novel + '/' + id,
     ).then(r => r.text());
     //console.log(body2);
     //const cheerio = parseHTML(body2)("body");
